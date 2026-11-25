@@ -1,0 +1,100 @@
+/* site.css — Styles specific to the public site. The shared visual system is in estilo/portal.css. */
+
+:root{
+  /* Taxonomic complexes. S, C and X pass colour-blindness checks; V is told apart by shape and tone. */
+  --cx-s:#1f5d9e; --cx-c:#c0781c; --cx-x:#179c6c; --cx-v:#3b4149; --cx-o:#8a8f96;
+  --lc-mb:#1f5d9e; --lc-ne:#c0781c;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --cx-s:#5b93d4; --cx-c:#c4862f; --cx-x:#2ea578; --cx-v:#d6dbe1; --cx-o:#8a939e; --lc-mb:#5b93d4; --lc-ne:#c4862f; }
+}
+
+.marca h1 a{color:inherit; text-decoration:none}
+.marca h1 a:hover{color:var(--accent)}
+
+/* Preview notice (shown while any dataset is still synthetic) */
+.vista-previa{background:var(--warn-soft); border-bottom:1px solid var(--warn); color:var(--ink-2); font-size:13px}
+.vista-previa .ancho{padding-top:9px; padding-bottom:9px}
+.vista-previa b{color:var(--warn)}
+
+/* Lead paragraph */
+.entrada{font-size:15px; line-height:1.6; color:var(--ink-2); max-width:78ch; margin:0}
+.entrada + .entrada{margin-top:10px}
+
+/* Module cards on the home page */
+.tarjetas{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:20px}
+.tarjeta{display:flex; flex-direction:column; gap:6px; border:1px solid var(--line); border-top:3px solid var(--accent);
+  background:var(--surface); padding:16px 18px 18px; text-decoration:none; color:inherit; border-radius:var(--r)}
+a.tarjeta:hover{border-color:var(--accent)}
+a.tarjeta:hover h3{color:var(--accent)}
+.tarjeta .rotulo{font-family:var(--font-serif); font-weight:600; color:var(--accent); font-size:14px}
+.tarjeta h3{margin:0}
+.tarjeta .cifra{font-size:30px; font-weight:600; line-height:1.1; color:var(--ink); margin-top:4px}
+.tarjeta .cifra small{font-size:13px; font-weight:500; color:var(--muted); margin-left:6px}
+.tarjeta p{margin:0; color:var(--muted); font-size:13px}
+.tarjeta.prox{border-top-color:var(--line-strong)}
+.tarjeta.prox .rotulo, .tarjeta.prox .cifra{color:var(--muted)}
+
+/* Facilities list */
+.instalaciones{display:grid; gap:14px; margin:0}
+.instalaciones div{border-left:3px solid var(--line-strong); padding:2px 0 2px 14px}
+.instalaciones dt{font-weight:600; color:var(--ink)}
+.instalaciones dd{margin:3px 0 0; color:var(--ink-2); font-size:13px}
+
+/* Filter row */
+.filtros-fila{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:flex-end; margin:4px 0 18px}
+.filtros-fila .campo label{display:block; font-size:12px; font-weight:600; color:var(--ink-2); margin-bottom:4px}
+.filtros-fila input, .filtros-fila select{padding:6px 8px; border:1px solid var(--line-strong); border-radius:var(--r); background:var(--surface); font-size:13.5px}
+.filtros-fila input[type=search]{width:240px}
+.filtros-fila .cuenta-res{margin-left:auto; color:var(--muted); font-size:13px; padding-bottom:7px}
+
+/* Tables */
+.tabla-cont.corta{max-height:none}
+td a{white-space:nowrap}
+.pub-tabla td{white-space:normal; vertical-align:top}
+.pub-tabla td.titulo-pub{min-width:320px}
+.pub-tabla .autores{display:block; color:var(--muted); font-size:12.5px; margin-top:2px}
+
+/* Badges */
+.etq.sint{background:var(--warn-soft); border-color:var(--warn); color:var(--warn); font-family:var(--font-mono); font-size:11px; letter-spacing:.03em; text-transform:uppercase}
+.etq.cx{font-weight:600}
+.etq.ok{background:var(--ok-soft); border-color:var(--ok); color:var(--ok)}
+.punto-cx{display:inline-block; width:9px; height:9px; margin-right:6px; vertical-align:baseline}
+
+/* Object view */
+.volver{margin-bottom:12px}
+.tabla-metodos td.num{width:90px}
+.descargas{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+.descargas a{font-size:13px}
+.cita{font-size:13.5px; color:var(--ink-2); margin:0}
+.cita i{color:var(--ink)}
+pre.bibtex{margin:10px 0 0; padding:10px 12px; background:var(--surface-2); border:1px solid var(--line); font-family:var(--font-mono);
+  font-size:12px; line-height:1.5; white-space:pre-wrap; color:var(--ink-2)}
+.opciones-fig{display:flex; gap:6px 14px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--ink-2)}
+.opciones-fig label{display:inline-flex; gap:6px; align-items:center}
+
+/* Classification page */
+.pasos{margin:0; padding-left:20px; color:var(--ink-2)}
+.pasos li + li{margin-top:8px}
+.zona-subida{border:1.5px dashed var(--line-strong); border-radius:var(--r); padding:26px 20px; text-align:center; color:var(--muted); background:var(--surface-2)}
+.zona-subida b{display:block; color:var(--ink-2); font-size:15px; margin-bottom:6px}
+
+/* Charts */
+.viz .barra-cx{stroke:none}
+.viz .col-barra:hover .barra-cx{opacity:.8}
+.viz .etiqueta-valor{fill:var(--ink-2); font-size:11px}
+.viz .error{stroke:var(--line-strong); stroke-width:1}
+.viz .linea-obj{fill:none; stroke:var(--accent); stroke-width:1.6; stroke-linejoin:round}
+.viz .linea-media{fill:none; stroke:var(--muted); stroke-width:2; stroke-dasharray:6 4; opacity:.9}
+.viz .cruz{stroke:var(--ink-2); stroke-width:1; opacity:.5}
+
+@media (min-width:981px){
+  .figs-catalogo{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+}
+@media (max-width:980px){
+  .tarjetas{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:860px){
+  .filtros-fila input[type=search]{width:100%}
+  .filtros-fila .cuenta-res{margin-left:0}
+}

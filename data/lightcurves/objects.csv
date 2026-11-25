@@ -1,0 +1,18 @@
+id,number,name,population,family,taxonomy,a_au,e,h_mag,d_km,pv,telescope,observing_dates,filters,publication,data_file,data_status,notes
+711,711,Marmulla,MBA (inner),Flora,"S, Sr",2.2369,0.1955,11.84,12.31,0.22 ± 0.09,Tonantzintla Schmidt Camera,2018-03-12; 2018-03-16; 2018-03-24; 2018-04-09,C; C; R; R,valdes2023,711.csv,synthetic,
+1036,1036,Ganymed,NEA (Amor),,"S, Sr",2.6629,0.5335,9.25,40.76,0.218 ± 0.048,Tonantzintla Schmidt Camera,2018-03-19; 2018-03-20; 2018-03-21,C; C; C,valdes2023,1036.csv,synthetic,
+1117,1117,Reginita,MBA (inner),,S,2.2475,0.1983,11.81,9.77,0.3585 ± 0.0785,Tonantzintla Schmidt Camera,2015-10-04; 2018-04-08; 2018-04-09,C; R; R,valdes2023,1117.csv,synthetic,
+1318,1318,Nerina,MBA (inner),Phocaea,M,2.3073,0.2039,12.37,10.9,0.1721 ± 0.0208,Tonantzintla Schmidt Camera,2018-03-17; 2018-03-27,R; R,valdes2023,1318.csv,synthetic,
+1346,1346,Gotha,MBA (middle),Eunomia,S,2.6269,0.1782,11.44,13.13,0.2794 ± 0.0411,Tonantzintla Schmidt Camera,2018-03-29,R,valdes2023,1346.csv,synthetic,
+1363,1363,Herberta,MBA (outer),Koronis,S,2.9036,0.0682,11.36,12.4,0.337 ± 0.157,Tonantzintla Schmidt Camera,2015-12-15; 2015-12-16; 2015-12-17,C; C; R,valdes2023,1363.csv,synthetic,
+1492,1492,Oppolzer,MBA (inner),,S,2.1729,0.1165,13.0,11.34,0.089 ± 0.026,Tonantzintla Schmidt Camera,2018-03-18; 2018-03-26,R; R,valdes2023,1492.csv,synthetic,
+1627,1627,Ivar,NEA (Amor),,"S, Sr",1.863,0.3965,12.68,10.71,0.134 ± 0.025,Tonantzintla Schmidt Camera,2018-03-17; 2018-03-27,C; R,valdes2023,1627.csv,synthetic,
+1831,1831,Nicholson,MBA (inner),,S,2.239,0.1279,12.57,7.58,0.296 ± 0.053,Tonantzintla Schmidt Camera,2018-03-10; 2018-03-11; 2018-03-14; 2018-03-25; 2018-04-14; 2018-04-20; 2018-04-21,C; C; C; R; R; R; R,valdes2023,1831.csv,synthetic,
+1847,1847,Stobbe,MBA (middle),,"Xc, M",2.6114,0.0214,11.13,16.64,0.2315 ± 0.0162,Tonantzintla Schmidt Camera,2018-04-18,R,valdes2023,1847.csv,synthetic,
+1866,1866,Sisyphus,NEA (Apollo),,"S, Sw",1.8933,0.5384,12.44,8.67,0.255 ± 0.0162,Tonantzintla Schmidt Camera,2018-03-25,C,valdes2023,1866.csv,synthetic,
+3800,3800,Karayusuf,Mars-crosser,,S,1.5779,0.0757,15.09,1.59,0.657 ± 0.123,Tonantzintla Schmidt Camera,2018-03-28,R,valdes2023,3800.csv,synthetic,
+5692,5692,Shirao,MBA (middle),,S,2.6554,0.1819,12.55,8.84,0.2218 ± 0.0290,Tonantzintla Schmidt Camera,2018-03-18; 2018-03-26; 2015-04-07,R; R; R,valdes2023,5692.csv,synthetic,The third observing date is listed as 2015 Apr 07 in the paper.
+25916,25916,2001 CP44,NEA (Amor),,Sw,2.5613,0.4979,13.68,4.83,0.262 ± 0.047,Tonantzintla Schmidt Camera,2018-04-14; 2018-04-16,R; R,valdes2023,25916.csv,synthetic,
+2345,2345,Fucik,MBA,Eos,,,,,,,Tonantzintla Schmidt Camera,2024-02-13 to 2024-02-16; 2024-03-12,R,munguia2026,2345.csv,synthetic,Previous determinations between 17.12 and 17.35 h. The abstract of the paper quotes 17.123 ± 0.002 h and 0.42 mag; the values here follow its Table I.
+3181,3181,Ahnert,MBA,,,,,,,,Tonantzintla Schmidt Camera,2024-02-21; 2024-02-22; 2024-02-27,R,munguia2026,,,No reliable period: very low photometric variability (amplitude about 0.05 mag). A possible solution near 3.110 h could not be confirmed.
+34704,34704,2001 OS80,MBA,Eunomia,,,,,,,Tonantzintla Schmidt Camera,2024-02-28 to 2024-03-02,R,munguia2026,34704.csv,synthetic,
