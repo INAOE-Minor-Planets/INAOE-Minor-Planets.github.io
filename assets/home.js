@@ -74,7 +74,7 @@
   $('#contenido').replaceChildren(el('div', { class: 'pila' },
     el('section', { class: 'panel' },
       el('div', { class: 'intro-cols' },
-        el('p', { class: 'entrada' }, 'The INAOE Minor Planets Group studies the physical properties of asteroids — their composition, rotation and size — with telescopes operated by the National Institute of Astrophysics, Optics and Electronics in Mexico. This site gathers the results we have published.'),
+        el('p', { class: 'entrada' }, 'The INAOE Minor Planets Group studies the physical properties of asteroids, composition, rotation and size, with telescopes operated by the National Institute of Astrophysics, Optics and Electronics in Mexico. This site gathers the results we have published.'),
         el('p', { class: 'entrada' }, 'They include visible reflectance spectra with their taxonomic classification, and rotational light curves. INAOE is a founding member of the International Asteroid Warning Network (IAWN), and part of our work characterises near-Earth asteroids during their close approaches to Earth.')),
       el('div', { class: 'tarjetas' },
         tarjeta('spectra/', 'II', 'Spectra', espectros.length, 'asteroids', 'Visible reflectance spectra (0.44–0.92 µm) from OAGH, classified in the Bus & Binzel taxonomy.'),
