@@ -76,7 +76,7 @@ function vistaCatalogo() {
     el('section', { class: 'panel' },
       el('div', { class: 'cab-seccion' }, el('h2', {}, 'Reflectance spectra'),
         el('p', { class: 'sub' }, `${CAT.length} asteroids · 0.44–0.92 µm · Bus & Binzel (2002) taxonomy`)),
-      el('p', { class: 'entrada' }, 'Visible spectra obtained with the Boller & Chivens spectrograph on the 2.1-m telescope of the Guillermo Haro Astrophysical Observatory. Each asteroid spectrum is divided by that of a solar analogue observed right after it and normalized to 1 at 0.55 µm. Classes come from the hybrid method of Buendia et al. (2026): a spectral distance with a weight function, checked with three k-nearest-neighbour classifiers.'),
+      el('p', { class: 'entrada' }, 'Visible spectra obtained with the Boller & Chivens spectrograph on the 2.1-m telescope of the Guillermo Haro Astrophysical Observatory. Each asteroid spectrum is divided by that of a solar analogue observed right after it and normalized to 1 at 0.55 µm. Most classes come from the hybrid method of Buendia et al. (2026): a spectral distance with a weight function, checked with three k-nearest-neighbour classifiers. The others are as given in each object\u2019s publication.'),
       el('div', { style: 'margin-top:16px' }, barra),
       el('div', { class: 'rejilla-2 figs-catalogo' }, contFig1, contFig2)),
     el('section', { class: 'panel' },
@@ -158,6 +158,7 @@ async function vistaObjeto(o) {
   const dato = (t, v) => el('div', {}, el('dt', {}, t), el('dd', {}, v));
   const metodos = [['Weight function (cumulative)', o.cwf_label, o.cwf_value], ['k-NN', o.knn_label, o.knn_prob],
                    ['k-NN with PCA', o.pca_label, o.pca_prob], ['k-NN with NCA', o.nca_label, o.nca_prob]];
+  const conPuntaje = metodos.filter(([, l, v]) => l || !vacio(v));      // rows the paper actually reports
   const contFig = el('div', {}, el('p', { class: 'sub' }, 'Loading spectrum…'));
   const sintetico = o.spectrum_status === 'synthetic';
   const tags = [
@@ -182,10 +183,12 @@ async function vistaObjeto(o) {
           el('h3', { style: 'margin-top:20px' }, 'Classification'),
           el('div', { class: 'tabla-simple' }, el('table', { class: 'simple tabla-metodos' },
             el('thead', {}, el('tr', {}, el('th', {}, 'Method'), el('th', {}, 'Type'), el('th', { class: 'num' }, 'Score'))),
-            el('tbody', {}, metodos.map(([m, l, v]) => el('tr', {}, el('td', {}, m), el('td', {}, l || '—'), el('td', { class: 'num' }, vacio(v) ? '—' : num(v, 3)))),
+            el('tbody', {}, conPuntaje.map(([m, l, v]) => el('tr', {}, el('td', {}, m), el('td', {}, l || '—'), el('td', { class: 'num' }, vacio(v) ? '—' : num(v, 3)))),
               el('tr', {}, el('td', {}, el('b', {}, 'Proposed class')), el('td', {}, el('b', {}, o.class)), el('td', {})),
               el('tr', {}, el('td', {}, 'Previously published class'), el('td', {}, o.previous_class || 'none'), el('td', {}))))),
-          el('p', { class: 'sub', style: 'margin-top:8px' }, 'Scores: cumulative weight function of the spectral distance (k = 10) and k-NN probabilities, with labels S, C, X, PS (positive slope) and NS (negative slope).')),
+          el('p', { class: 'sub', style: 'margin-top:8px' }, conPuntaje.length
+            ? 'Scores: cumulative weight function of the spectral distance (k = 10) and k-NN probabilities, with labels S, C, X, PS (positive slope) and NS (negative slope).'
+            : 'No classifier scores for this object: the class is the one given in the publication (see Notes).')),
         contFig)),
     el('section', { class: 'panel' },
       o.notes ? [el('h3', {}, 'Notes'), el('p', { class: 'entrada', style: 'font-size:14px' }, o.notes)] : null,
