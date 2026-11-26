@@ -60,6 +60,15 @@ cambiar los valores. Las columnas están descritas en la
 Para que el objeto aparezca en la figura orbital, llena también `a_au`, `e` e `i_deg`. Los valores
 se consultan en el [JPL Small-Body Database](https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html).
 
+Si el artículo **no usó el clasificador híbrido** (por ejemplo, si clasificó por distancia espectral
+a las medias de DeMeo et al. 2009), deja vacías las columnas `cwf_*`, `knn_*`, `pca_*` y `nca_*`. La
+ficha mostrará solo la clase propuesta, y en `notes` puedes explicar cómo se obtuvo. Marca
+`d_estimated` con `yes` solo si el diámetro se calculó con el albedo medio del tipo taxonómico. Si
+el artículo da un intervalo, escríbelo tal cual en `d_km` (por ejemplo `0.0119–0.0381`).
+
+**4. Si el artículo es nuevo**, agrégalo también a `data/publications.csv`
+([ver abajo](#agregar-una-publicación)) y usa su `id` en la columna `publication`.
+
 ## Reemplazar un espectro sintético por el real
 
 Los espectros y curvas de luz que hay ahora son **sintéticos**: se generaron a partir de la clase,
