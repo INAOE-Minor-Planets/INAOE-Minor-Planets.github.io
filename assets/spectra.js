@@ -4,13 +4,13 @@
 
 let CAT = [], MEDIAS = null, CUENTAS = new Map();
 const filtros = { texto: '', complejo: '', poblacion: '', pub: '', clase: '' };
-let ejeOrbita = 'i';
+let ejeOrbita = 'i', vistaOrbita = 'full';
 
 (async function () {
   cabecera({ activo: 'spectra' }); pie();
   try {
     const [cat, medias, cuentas] = await Promise.all([cargarCSV('data/spectra/catalog.csv'), cargarCSV('data/spectra/class_means.csv'),
-      cargarCSV('data/spectra/class_means_counts.csv'), cargarPublicaciones()]);
+      cargarCSV('data/spectra/class_means_counts.csv'), cargarPublicaciones(), cargarCapasOrbitales()]);
     CAT = cat; MEDIAS = medias; CUENTAS = new Map(cuentas.map(c => [c.class, +c.n_spectra]));
   } catch (e) { return errorCarga(e); }
   avisoVistaPrevia(CAT.filter(o => o.spectrum_status === 'synthetic').length, 'spectra');
@@ -122,26 +122,33 @@ function figComposicion(filas, repintar) {
     el('figcaption', {}, el('b', {}, 'Figure 1. '), 'Asteroids per taxonomic class. Click a bar to filter the catalogue by that class.'));
 }
 
-/* Figure: orbital elements of the main-belt objects */
+/* Figure: orbital elements (a–i or a–e), full frame as in the group's plots or zoomed on the objects */
 function figOrbitas(filas) {
-  const mb = filas.filter(o => !o.population.startsWith('nea') && o.a_au && o.e && o.i_deg);
-  const fuera = filas.filter(o => !mb.includes(o));
   const yk = ejeOrbita === 'i' ? 'i_deg' : 'e';
-  const as = mb.map(o => +o.a_au), ys = mb.map(o => +o[yk]);
-  const xDom = mb.length ? [Math.floor(Math.min(...as) * 20) / 20, Math.ceil(Math.max(...as) * 20) / 20] : [2.1, 2.5];
-  const yDom = [0, mb.length ? (ejeOrbita === 'i' ? Math.ceil(Math.max(...ys) / 2) * 2 : Math.ceil(Math.max(...ys) * 20) / 20) : 1];
-  const puntos = mb.map(o => { const c = complejoDe(o.class); return { x: +o.a_au, y: +o[yk], forma: c.forma, color: c.color, r: 3.4, datos: o }; });
-  const lz = lienzo(dispersion({ puntos, xDom, yDom, alto: 330, descripcion: 'Orbital elements of the observed main-belt asteroids',
-    xTitulo: [varSVG('a'), ' (au)'], yTitulo: ejeOrbita === 'i' ? [varSVG('i'), ' (°)'] : [varSVG('e')],
+  const conElementos = filas.filter(o => o.a_au && o[yk]);
+  const zoomables = conElementos.filter(o => !o.population.startsWith('nea'));          // zoom frames the main-belt objects
+  const aPunto = o => { const c = complejoDe(o.class); return { x: +o.a_au, y: +o[yk], forma: c.forma, color: c.color, r: 3.6, datos: o }; };
+  const puntos = (vistaOrbita === 'zoom' ? zoomables : conElementos).map(aPunto);
+  const fuera = [...fueraDeMarco(puntos, ejeOrbita, vistaOrbita).map(p => p.datos), ...(vistaOrbita === 'zoom' ? conElementos.filter(o => !zoomables.includes(o)) : []),
+                 ...filas.filter(o => !conElementos.includes(o))];
+  const lz = lienzo(figuraOrbital({ eje: ejeOrbita, vista: vistaOrbita, puntos, alto: 380, descripcion: `Semimajor axis versus ${ejeOrbita === 'i' ? 'inclination' : 'eccentricity'} of the observed asteroids`,
     tip: o => [el('strong', {}, nombreObjeto(o)), el('span', {}, `Class ${o.class} · ${complejoDe(o.class).nombre}`),
-      el('span', { class: 'mono' }, `a ${num(o.a_au, 3)}  e ${num(o.e, 3)}  i ${num(o.i_deg, 2)}°`)],
+      el('span', { class: 'mono' }, `a ${tal(o.a_au)}  e ${tal(o.e)}  i ${tal(o.i_deg)}°`)],
     alClic: o => { location.hash = encodeURIComponent(o.id); } }));
-  const botones = ['i', 'e'].map(k => el('button', { type: 'button', 'aria-pressed': ejeOrbita === k ? 'true' : 'false',
-    onclick: () => { ejeOrbita = k; lz.parentElement.parentElement.replaceWith(figOrbitas(filas)); } }, 'a – ', el('var', {}, k)));
+  const rehacer = () => lz.parentElement.parentElement.replaceWith(figOrbitas(filas));
+  const grupo = (etiqueta, opciones, actual, fijar) => el('div', { class: 'alternar', role: 'group', 'aria-label': etiqueta },
+    opciones.map(([k, ...t]) => el('button', { type: 'button', 'aria-pressed': actual === k ? 'true' : 'false', onclick: () => { fijar(k); rehacer(); } }, t)));
+  const texto = ejeOrbita === 'i'
+    ? ['Dashed grey lines: 5:1, 4:1 and 3:1 mean-motion resonances with Jupiter; dashed black curves: ', el('var', {}, 'ν'), el('sub', {}, '6'), ' and ', el('var', {}, 'ν'), el('sub', {}, '16'), ' secular resonances.']
+    : 'Grey lines: perihelion distance q = 1.017, 1.3 and 1.67 au, aphelion distance Q = 0.983 au and a = 1 au, which separate Atiras, Atens, Apollos, Amors, Mars-crossers (MCs) and the main belt.';
   return el('figure', { class: 'fig' },
-    el('div', { class: 'fig-cab' }, el('span', { class: 'sub' }, `${mb.length} main-belt asteroids`), el('div', { class: 'alternar', role: 'group', 'aria-label': 'Vertical axis' }, botones)),
+    el('div', { class: 'fig-cab' }, el('span', { class: 'sub' }, `${puntos.length - fueraDeMarco(puntos, ejeOrbita, vistaOrbita).length} asteroids shown`),
+      el('div', { style: 'margin-left:auto; display:flex; gap:8px; flex-wrap:wrap' },
+        grupo('Vertical axis', [['i', 'a – ', el('var', {}, 'i')], ['e', 'a – ', el('var', {}, 'e')]], ejeOrbita, k => { ejeOrbita = k; }),
+        grupo('Extent', [['full', 'Full'], ['zoom', 'Zoom']], vistaOrbita, k => { vistaOrbita = k; }))),
     el('div', {}, lz),
-    el('figcaption', {}, el('b', {}, 'Figure 2. '), 'Osculating orbital elements (JPL Small-Body Database) of the main-belt asteroids in the selection, by taxonomic complex. Click a point to open its spectrum.',
+    el('figcaption', {}, el('b', {}, 'Figure 2. '), 'Osculating orbital elements (JPL Small-Body Database) of the asteroids in the selection, by taxonomic complex. ', texto,
+      CAPAS_ORB.fondo.length ? ' Small grey dots: a sample of known asteroids.' : '', ' Click a point to open its spectrum.',
       fuera.length ? ` Not shown: ${fuera.map(nombreObjeto).join(', ')}.` : ''));
 }
 

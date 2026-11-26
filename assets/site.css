@@ -87,6 +87,14 @@ pre.bibtex{margin:10px 0 0; padding:10px 12px; background:var(--surface-2); bord
 .viz .linea-obj{fill:none; stroke:var(--accent); stroke-width:1.6; stroke-linejoin:round}
 .viz .linea-media{fill:none; stroke:var(--muted); stroke-width:2; stroke-dasharray:6 4; opacity:.9}
 .viz .cruz{stroke:var(--ink-2); stroke-width:1; opacity:.5}
+/* Orbital figures */
+.viz .limite-orb{fill:none; stroke:var(--muted); stroke-width:1.4; opacity:.85}
+.viz .resonancia-mm{stroke:var(--muted); stroke-width:1.4; stroke-dasharray:6 4; opacity:.85}
+.viz .resonancia-sec{fill:none; stroke:var(--ink); stroke-width:1.6; stroke-dasharray:7 4}
+.viz .rotulo-linea{fill:var(--ink-2); font-size:11.5px}
+.viz .rotulo-region{fill:var(--ink); font-size:12.5px; font-weight:600}
+.viz .rotulo-region.grande{font-size:15px}
+.viz .fondo-pob{fill:var(--viz-mba); opacity:.35}
 
 @media (min-width:981px){
   .figs-catalogo{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}

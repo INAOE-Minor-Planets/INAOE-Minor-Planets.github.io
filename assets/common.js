@@ -201,7 +201,8 @@ const tituloEje = (texto, attrs) => S('text', { class: 'titulo-eje', ...attrs },
 const varSVG = s => S('tspan', { style: 'font-style:italic; font-family:var(--font-serif); font-size:13px' }, s);
 
 /* Scatter with nearest-point hover. puntos: [{x, y, forma, color, r, datos}] */
-function dispersion({ puntos, xDom, yDom, xTitulo, yTitulo, alto = 320, xLog = false, yInv = false, alClic, tip, extras, descripcion = 'Scatter plot' }) {
+let idRecorte = 0;
+function dispersion({ puntos, xDom, yDom, xTitulo, yTitulo, alto = 320, xLog = false, yInv = false, alClic, tip, extras, fondo, descripcion = 'Scatter plot' }) {
   return w => {
     const M = { l: 46, r: 12, t: 16, b: 40 }, H = alto;
     const pw = w - M.l - M.r, ph = H - M.t - M.b;
@@ -218,7 +219,14 @@ function dispersion({ puntos, xDom, yDom, xTitulo, yTitulo, alto = 320, xLog = f
     g.append(S('line', { class: 'eje', x1: 0, x2: pw, y1: ph, y2: ph }), S('line', { class: 'eje', x1: 0, x2: 0, y1: 0, y2: ph }));
     g.append(tituloEje(xTitulo, { x: pw / 2, y: ph + 32, 'text-anchor': 'middle' }));
     g.append(tituloEje(yTitulo, { x: -M.l + 2, y: -5, 'text-anchor': 'start' }));
-    if (extras) g.append(extras({ x, y, pw, ph }));
+    const recorte = 'recorte' + (++idRecorte);
+    g.append(S('defs', {}, S('clipPath', { id: recorte }, S('rect', { x: 0, y: 0, width: pw, height: ph }))));
+    if (fondo && fondo.length) {          // context population: one path of tiny squares, cheap to draw
+      let d = '';
+      for (const [fa, fb] of fondo) if (fa >= xDom[0] && fa <= xDom[1] && fb >= Math.min(...yDom) && fb <= Math.max(...yDom)) d += `M${x(fa).toFixed(1)} ${y(fb).toFixed(1)}h1.4v1.4h-1.4z`;
+      g.append(S('path', { class: 'fondo-pob', d }));
+    }
+    if (extras) g.append(S('g', { 'clip-path': `url(#${recorte})` }, extras({ x, y, pw, ph, xDom, yDom })));
     const px = puntos.filter(p => p.x >= xDom[0] && p.x <= xDom[1] && p.y >= Math.min(...yDom) && p.y <= Math.max(...yDom)).map(p => ({ ...p, sx: x(p.x), sy: y(p.y) }));
     g.append(S('g', {}, px.map(p => marcador(p.forma, p.sx, p.sy, p.r || 3.6, p.color))));
     const anillo = S('circle', { r: 7, style: 'fill:none; stroke:var(--ink); stroke-width:1.5', visibility: 'hidden' });
@@ -267,3 +275,89 @@ function tablaOrdenable(filas, columnas, { onFila, orden, dir = 1, textoVacio = 
   return caja;
 }
 const enlaceInterno = (texto, hash) => el('a', { href: '#' + hash, onclick: e => { e.stopPropagation(); } }, texto);
+
+
+/* ---------------- Orbital-element figures (a–e and a–i) ----------------
+   Region boundaries as in the group's NEO / Mars-crosser plots. Optional files in data/orbits/:
+   nu6.csv and nu16.csv (secular resonances, columns a_au,i_deg) and background.csv (a sample of
+   known asteroids, columns a,e,i) drawn as faint grey context. */
+let CAPAS_ORB = { nu6: [], nu16: [], fondo: [] };
+async function cargarCapasOrbitales() {
+  const opcional = p => cargarCSV(p).catch(() => []);
+  const [nu6, nu16, fondo] = await Promise.all([opcional('data/orbits/nu6.csv'), opcional('data/orbits/nu16.csv'), opcional('data/orbits/background.csv')]);
+  const par = r => [+r.a_au, +r.i_deg];
+  CAPAS_ORB = { nu6: nu6.map(par).filter(p => !isNaN(p[0] + p[1])), nu16: nu16.map(par).filter(p => !isNaN(p[0] + p[1])),
+    fondo: fondo.map(r => ({ a: +r.a, e: r.e === '' ? NaN : +r.e, i: r.i === '' ? NaN : +r.i })).filter(r => r.a > 0) };
+  return CAPAS_ORB;
+}
+const MARCO_ORB = { e: { xDom: [0.5, 3.5], yDom: [0, 1] }, i: { xDom: [1, 3.25], yDom: [0, 40] } };
+const RESONANCIAS_MM = [[1.780, '5:1'], [2.065, '4:1'], [2.502, '3:1']];
+const textoHalo = (attrs, ...hijos) => S('text', { ...attrs, style: `paint-order:stroke; stroke:var(--surface); stroke-width:3.5px; ${attrs.style || ''}` }, ...hijos);
+const conSubindice = (base, sub) => [base, S('tspan', { 'baseline-shift': 'sub', style: 'font-size:.75em' }, sub)];
+
+function capasOrbitales(eje) {
+  return ({ x, y, pw, ph, xDom, yDom }) => {
+    const g = S('g', { class: 'capas-orb' });
+    const dentro = (a, v) => a >= xDom[0] && a <= xDom[1] && v >= yDom[0] && v <= yDom[1];
+    const trazo = (pts, clase) => S('path', { class: clase, d: pts.map((p, k) => `${k ? 'L' : 'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join('') });
+    const muestreo = (f, a0, a1) => { const n = 240, pts = []; for (let k = 0; k <= n; k++) { const a = a0 + (a1 - a0) * k / n; pts.push([a, f(a)]); } return pts; };
+    /* label placed along a curve, rotated with its local slope */
+    const holgado = (p, m = 30) => dentro(p[0], p[1]) && x(p[0]) > m && x(p[0]) < pw - 4 && y(p[1]) > 18 && y(p[1]) < ph - 6;   // keeps labels off the frame
+    const rotulo = (texto, pts, cerca, { lado = -5, ancla = 'end', estilo = '' } = {}) => {
+      const vis = pts.filter(p => holgado(p, ancla === 'end' ? 80 : 40));
+      if (vis.length < 2) return null;
+      const k = Math.max(1, Math.min(vis.length - 1, Math.round(cerca * (vis.length - 1))));
+      const [a0, v0] = vis[k - 1], [a1, v1] = vis[k];
+      let ang = Math.atan2(y(v1) - y(v0), x(a1) - x(a0)) * 180 / Math.PI;
+      if (ang > 90) ang -= 180; else if (ang < -90) ang += 180;       // never upside down
+      const px = x(a1), py = y(v1);
+      return textoHalo({ x: px, y: py, dy: lado, 'text-anchor': ancla, transform: `rotate(${ang.toFixed(1)} ${px.toFixed(1)} ${py.toFixed(1)})`, class: 'rotulo-linea', style: estilo }, texto);
+    };
+    const region = (texto, a, v, clase = 'rotulo-region') => dentro(a, v) ? textoHalo({ x: x(a), y: y(v), 'text-anchor': 'middle', class: clase }, texto) : null;
+    if (eje === 'e') {
+      const curvas = [
+        ['q = 1.017 au', muestreo(a => 1 - 1.017 / a, 1.017, 4)],
+        ['q = 1.3 au', muestreo(a => 1 - 1.3 / a, 1.3, 4)],
+        ['q = 1.67 au', muestreo(a => 1 - 1.67 / a, 1.67, 4)],
+      ];
+      const aten = muestreo(a => 0.983 / a - 1, 0.45, 0.983);                       // aphelion Q = 0.983 au
+      for (const [, pts] of curvas) g.append(trazo(pts, 'limite-orb'));
+      g.append(trazo(aten, 'limite-orb'));
+      if (1 >= xDom[0] && 1 <= xDom[1]) g.append(S('line', { class: 'limite-orb', x1: x(1), x2: x(1), y1: 0, y2: ph }));
+      for (const [t, pts] of curvas) g.append(rotulo(t, pts, 0.97));
+      g.append(rotulo('Q = 0.983 au', aten.slice().reverse(), 0.45, { lado: -6, ancla: 'middle' }));
+      g.append(region('Atiras', 0.62, 0.05), region('Atens', 0.80, 0.85), region('Apollos', 1.65, 0.85),
+               region('Amors', 2.15, 0.46), region('MCs', 1.47, 0.06), region('Main belt', 3.0, 0.24, 'rotulo-region grande'));
+    } else {
+      for (const [a, t] of RESONANCIAS_MM) if (a >= xDom[0] && a <= xDom[1]) {
+        g.append(S('line', { class: 'resonancia-mm', x1: x(a), x2: x(a), y1: 14, y2: ph }));
+        g.append(textoHalo({ x: x(a), y: 11, 'text-anchor': 'middle', class: 'rotulo-linea' }, t));
+      }
+      for (const [nombre, sub, pts, cerca] of [['ν', '6', CAPAS_ORB.nu6, 0.72], ['ν', '16', CAPAS_ORB.nu16, 0.78]]) {
+        if (!pts.length) continue;
+        g.append(trazo(pts, 'resonancia-sec'));
+        const vis = pts.filter(p => holgado(p, 10) && x(p[0]) < pw - 40);
+        if (vis.length) {
+          const [a, v] = vis[Math.min(vis.length - 1, Math.round(cerca * (vis.length - 1)))];
+          g.append(textoHalo({ x: x(a) + 7, y: y(v) - 7, class: 'rotulo-region', style: 'font-style:italic; font-family:var(--font-serif); font-size:14px' }, conSubindice(nombre, sub)));
+        }
+      }
+    }
+    return g;
+  };
+}
+
+/* Builds the draw function of an a–e or a–i figure. vista: 'full' (frames of the group's plots) or 'zoom'. */
+function figuraOrbital({ eje = 'e', vista = 'full', puntos, alto = 360, tip, alClic, descripcion }) {
+  let { xDom, yDom } = MARCO_ORB[eje];
+  if (vista === 'zoom' && puntos.length) {
+    const as = puntos.map(p => p.x), vs = puntos.map(p => p.y);
+    const paso = eje === 'e' ? 0.05 : 1;
+    xDom = [Math.floor(Math.min(...as) * 20) / 20 - 0.05, Math.ceil(Math.max(...as) * 20) / 20 + 0.05];
+    yDom = [0, Math.ceil(Math.max(...vs) / paso) * paso + paso];
+  }
+  const fondo = CAPAS_ORB.fondo.filter(r => !isNaN(r[eje])).map(r => [r.a, r[eje]]);
+  return dispersion({ puntos, xDom, yDom, alto, tip, alClic, fondo, extras: capasOrbitales(eje), descripcion,
+    xTitulo: ['Semimajor axis ', varSVG('a'), ' (au)'], yTitulo: eje === 'e' ? ['Eccentricity ', varSVG('e')] : ['Inclination ', varSVG('i'), ' (°)'] });
+}
+const fueraDeMarco = (puntos, eje, vista) => vista === 'zoom' ? [] : puntos.filter(p => { const { xDom, yDom } = MARCO_ORB[eje]; return p.x < xDom[0] || p.x > xDom[1] || p.y < yDom[0] || p.y > yDom[1]; });

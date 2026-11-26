@@ -16,8 +16,9 @@ recargar la página del sitio sin caché: Ctrl + F5, o Cmd + Shift + R en Mac.
 3. [Reemplazar un espectro sintético por el real](#reemplazar-un-espectro-sintético-por-el-real)
 4. [Agregar una curva de luz](#agregar-una-curva-de-luz)
 5. [Agregar una publicación](#agregar-una-publicación)
-6. [Referencia de columnas](#referencia-de-columnas)
-7. [Si algo no se ve](#si-algo-no-se-ve)
+6. [Figuras orbitales: resonancias y población de fondo](#figuras-orbitales-resonancias-y-población-de-fondo)
+7. [Referencia de columnas](#referencia-de-columnas)
+8. [Si algo no se ve](#si-algo-no-se-ve)
 
 ## Reglas de los archivos CSV
 
@@ -100,6 +101,36 @@ Si no se pudo determinar el periodo, agrega el objeto en `objects.csv` y no pong
 Agrega una fila a `data/publications.csv`. El `id` es una clave corta y única (por ejemplo
 `buendia2027`) que se usa en la columna `publication` de las otras tablas para ligar cada objeto
 con su artículo. Si tiene DOI, escríbelo sin `https://doi.org/` (por ejemplo `10.1093/mnras/staf2098`).
+
+## Figuras orbitales: resonancias y población de fondo
+
+Las figuras de semieje mayor contra excentricidad e inclinación (portada y espectros) dibujan:
+
+- **En *a–e*:** las líneas q = 1.017, 1.3 y 1.67 au, Q = 0.983 au y a = 1 au, y los nombres de las
+  regiones. Se calculan solas; no dependen de ningún archivo.
+- **En *a–i*:** las resonancias 5:1, 4:1 y 3:1, y las curvas de las resonancias seculares ν6 y
+  ν16, que se leen de `data/orbits/nu6.csv` y `data/orbits/nu16.csv` (columnas `a_au,i_deg`).
+  Las actuales se digitalizaron de la figura del grupo. Para usar las originales, sube tus archivos
+  con esos mismos nombres y la misma primera línea `a_au,i_deg`.
+- **Opcional: una población de fondo** en gris, como en las figuras de la tesis. Si existe
+  `data/orbits/background.csv`, las dos figuras lo dibujan detrás de nuestros objetos. Debe tener la
+  primera línea `a,e,i` y una fila por asteroide; si a una fila le falta `e` o `i`, simplemente no
+  aparece en esa figura. Conviene que no pase de unas 60 000 filas, porque se descarga cada vez que
+  alguien abre la página.
+
+Para generarlo en Colab a partir de los DataFrames de la tesis (ajusta los nombres si cambian):
+
+```python
+import pandas as pd
+cercanos = pd.concat([df_Atira, df_Aten, df_Apollo, df_Amor, df_MC])
+cinturon = pd.concat([df_IMB, df_MB, df_OMB])
+fondo = pd.concat([cercanos.sample(min(len(cercanos), 20000), random_state=1),
+                   cinturon.sample(40000, random_state=1)])
+fondo = fondo[(fondo.a > 0.5) & (fondo.a < 3.5)][['a', 'e', 'i']].round(4)
+fondo.to_csv('background.csv', index=False)
+```
+
+Luego súbelo a `data/orbits/` con **Add file → Upload files**.
 
 ## Referencia de columnas
 

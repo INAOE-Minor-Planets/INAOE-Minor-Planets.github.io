@@ -23,6 +23,7 @@ data/                   All content, as CSV and text files — edit here
   spectra/catalog.csv, class_means.csv, files/*.txt
   lightcurves/objects.csv, periods.csv, files/*.csv
   classification/performance.csv
+  orbits/nu6.csv, nu16.csv       Secular resonances for the a–i figures (optional background.csv)
 assets/                 Page code (JavaScript) and site-specific styles
 estilo/                 Shared visual system (also used by the internal observation archive)
 ```

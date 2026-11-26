@@ -5,7 +5,7 @@
   let espectros, objetosLC, periodos;
   try {
     [espectros, objetosLC, periodos] = await Promise.all([
-      cargarCSV('data/spectra/catalog.csv'), cargarCSV('data/lightcurves/objects.csv'), cargarCSV('data/lightcurves/periods.csv'), cargarPublicaciones()]);
+      cargarCSV('data/spectra/catalog.csv'), cargarCSV('data/lightcurves/objects.csv'), cargarCSV('data/lightcurves/periods.csv'), cargarPublicaciones(), cargarCapasOrbitales()]);
   } catch (e) { cabecera(); pie(); return errorCarga(e); }
 
   const conPeriodo = new Set(periodos.filter(p => p.period_h).map(p => p.id));
@@ -35,17 +35,12 @@
   const fig1 = el('figure', { class: 'fig' },
     el('div', { class: 'fig-cab' }, leyenda([['circulo', 'var(--cx-s)', 'Reflectance spectrum', puntos.filter(p => p.datos.modulo === 'spectra').length],
                                               ['cuadro', 'var(--cx-c)', 'Light curve', puntos.filter(p => p.datos.modulo === 'lightcurves').length]])),
-    lienzo(dispersion({ puntos, xDom: [0.8, 3.0], yDom: [0, 0.7], alto: 300, descripcion: 'Semimajor axis versus eccentricity of the asteroids in our publications',
-      xTitulo: [varSVG('a'), ' (au)'], yTitulo: [varSVG('e')],
-      extras: ({ x, y, pw, ph }) => {
-        const pts = []; for (let a = 1.3; a <= 3.0001; a += 0.02) pts.push(`${x(a).toFixed(1)},${y(1 - 1.3 / a).toFixed(1)}`);
-        return S('g', {}, S('polyline', { class: 'umbral', points: pts.join(' ') }),
-          S('text', { x: pw - 2, y: y(1 - 1.3 / 3) - 6, 'text-anchor': 'end', style: 'paint-order:stroke; stroke:var(--surface); stroke-width:3px' }, 'q = 1.3 au'));
-      },
-      tip: d => [el('strong', {}, nombreObjeto(d.o)), el('span', {}, d.txt)],
+    lienzo(figuraOrbital({ eje: 'e', puntos, alto: 380, descripcion: 'Semimajor axis versus eccentricity of the asteroids in our publications',
+      tip: d => [el('strong', {}, nombreObjeto(d.o)), el('span', {}, d.txt), el('span', { class: 'mono' }, `a ${d.o.a_au}  e ${d.o.e}`)],
       alClic: d => { location.href = ruta(`${d.modulo}/#${encodeURIComponent(d.o.id)}`); } })),
     el('figcaption', {}, el('b', {}, 'Figure 1. '), 'Osculating semimajor axis and eccentricity (JPL Small-Body Database) of the asteroids in our publications. ',
-      'Objects below the dashed curve (perihelion q = 1.3 au) are main-belt or Mars-crossing; above it, near-Earth. Click a point to open the object.'));
+      'Grey lines: perihelion distance q = 1.017, 1.3 and 1.67 au, aphelion distance Q = 0.983 au and a = 1 au, which separate Atiras, Atens, Apollos, Amors, Mars-crossers (MCs) and the main belt.',
+      CAPAS_ORB.fondo.length ? ` Small grey dots: a sample of ${CAPAS_ORB.fondo.length.toLocaleString('en')} known asteroids.` : '', ' Click a point to open the object.'));
 
   const instalaciones = el('dl', { class: 'instalaciones' },
     el('div', {}, el('dt', {}, '2.1-m telescope, Guillermo Haro Astrophysical Observatory (OAGH)'),
