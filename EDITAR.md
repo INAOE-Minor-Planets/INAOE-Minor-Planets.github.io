@@ -113,12 +113,13 @@ con su artículo. Si tiene DOI, escríbelo sin `https://doi.org/` (por ejemplo `
 
 ## Figuras orbitales: resonancias y población de fondo
 
-Las figuras de semieje mayor contra excentricidad e inclinación (portada y espectros) dibujan:
+Las figuras de semieje mayor contra excentricidad e inclinación (las dos de la portada y la de la página de espectros) dibujan:
 
 - **En *a–e*:** las líneas q = 1.017, 1.3 y 1.67 au, Q = 0.983 au y a = 1 au, y los nombres de las
   regiones. Se calculan solas; no dependen de ningún archivo.
-- **En *a–i*:** las resonancias 5:1, 4:1 y 3:1, y las curvas de las resonancias seculares ν6 y
-  ν16, que se leen de `data/orbits/nu6.csv` y `data/orbits/nu16.csv` (columnas `a_au,i_deg`).
+- **En *a–i*:** el eje horizontal va de 0.9 a 3.5 au y el vertical de 0 a 40°; si algún objeto pasa
+  de 40°, el eje sube solo hasta el siguiente múltiplo de 5. Se dibujan las resonancias 5:1, 4:1 y 3:1,
+  y las curvas de las resonancias seculares ν6 y ν16, que se leen de `data/orbits/nu6.csv` y `data/orbits/nu16.csv` (columnas `a_au,i_deg`).
   Las actuales se digitalizaron de la figura del grupo. Para usar las originales, sube tus archivos
   con esos mismos nombres y la misma primera línea `a_au,i_deg`.
 - **Opcional: una población de fondo** en gris, como en las figuras de la tesis. Si existe
@@ -178,7 +179,8 @@ Luego súbelo a `data/orbits/` con **Add file → Upload files**.
 | `id`, `number`, `name` | Como en espectros |
 | `population` | Texto libre que empieza con `MBA` para el cinturón principal (por ejemplo `MBA (inner)`); cualquier otro valor cuenta como cercano a la Tierra o cruzador de Marte |
 | `family`, `taxonomy` | Familia y clase taxonómica publicadas |
-| `a_au`, `e`, `h_mag`, `d_km`, `pv` | Parámetros físicos y orbitales |
+| `a_au`, `e`, `i_deg` | Semieje mayor (au), excentricidad e inclinación (°), del JPL Small-Body Database. Sin ellos, el objeto no aparece en las figuras orbitales de la portada |
+| `h_mag`, `d_km`, `pv` | Parámetros físicos |
 | `telescope` | `Tonantzintla Schmidt Camera` |
 | `observing_dates` | Noches separadas por `;` (`2018-03-17; 2018-03-27`) o un intervalo (`2024-02-28 to 2024-03-02`) |
 | `filters` | Filtro por noche, separados por `;` (`C; R`) |

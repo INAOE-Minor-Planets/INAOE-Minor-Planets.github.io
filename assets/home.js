@@ -1,4 +1,4 @@
-/* home.js — Home page: overview, module cards, orbital figure, facilities and publications. */
+/* home.js — Home page: overview, module cards, orbital figures (a–e and a–i), facilities and publications. */
 'use strict';
 
 (async function () {
@@ -25,22 +25,32 @@
       el('span', { class: 'rotulo' }, rotulo), el('h3', {}, titulo),
       el('div', { class: 'cifra' }, cifra, unidad ? el('small', {}, unidad) : null), el('p', {}, texto));
 
-  // Figure 1: every asteroid in the publications, in the a–e plane
-  const puntos = [
-    ...espectros.filter(o => o.a_au && o.e).map(o => ({ x: +o.a_au, y: +o.e, forma: 'circulo', color: 'var(--cx-s)', r: 3.2,
-      datos: { o, modulo: 'spectra', txt: `Spectrum · class ${o.class}` } })),
-    ...objetosLC.filter(o => o.a_au && o.e).map(o => ({ x: +o.a_au, y: +o.e, forma: 'cuadro', color: 'var(--cx-c)', r: 3.8,
-      datos: { o, modulo: 'lightcurves', txt: 'Light curve' + (conPeriodo.has(o.id) ? '' : ' (no period)') } })),
+  // Figures 1 and 2: every asteroid in the publications, in the a–e and a–i planes
+  const objetos = [
+    ...espectros.map(o => ({ o, modulo: 'spectra', forma: 'circulo', color: 'var(--cx-s)', r: 3.2, txt: `Spectrum · class ${o.class}` })),
+    ...objetosLC.map(o => ({ o, modulo: 'lightcurves', forma: 'cuadro', color: 'var(--cx-c)', r: 3.8, txt: 'Light curve' + (conPeriodo.has(o.id) ? '' : ' (no period)') })),
   ];
-  const fig1 = el('figure', { class: 'fig' },
-    el('div', { class: 'fig-cab' }, leyenda([['circulo', 'var(--cx-s)', 'Reflectance spectrum', puntos.filter(p => p.datos.modulo === 'spectra').length],
-                                              ['cuadro', 'var(--cx-c)', 'Light curve', puntos.filter(p => p.datos.modulo === 'lightcurves').length]])),
-    lienzo(figuraOrbital({ eje: 'e', puntos, alto: 380, descripcion: 'Semimajor axis versus eccentricity of the asteroids in our publications',
-      tip: d => [el('strong', {}, nombreObjeto(d.o)), el('span', {}, d.txt), el('span', { class: 'mono' }, `a ${d.o.a_au}  e ${d.o.e}`)],
-      alClic: d => { location.href = ruta(`${d.modulo}/#${encodeURIComponent(d.o.id)}`); } })),
-    el('figcaption', {}, el('b', {}, 'Figure 1. '), 'Osculating semimajor axis and eccentricity (JPL Small-Body Database) of the asteroids in our publications. ',
-      'Grey lines: perihelion distance q = 1.017, 1.3 and 1.67 au, aphelion distance Q = 0.983 au and a = 1 au, which separate Atiras, Atens, Apollos, Amors, Mars-crossers (MCs) and the main belt.',
-      CAPAS_ORB.fondo.length ? ` Small grey dots: a sample of ${CAPAS_ORB.fondo.length.toLocaleString('en')} known asteroids.` : '', ' Click a point to open the object.'));
+  const incl = o => o.i_deg;
+  const puntosDe = eje => objetos.filter(d => d.o.a_au && (eje === 'e' ? d.o.e : incl(d.o)))
+    .map(d => ({ x: +d.o.a_au, y: +(eje === 'e' ? d.o.e : incl(d.o)), forma: d.forma, color: d.color, r: d.r, datos: d }));
+  const puntosE = puntosDe('e'), puntosI = puntosDe('i');
+  const cuantos = (m) => new Set([...puntosE, ...puntosI].filter(p => p.datos.modulo === m).map(p => p.datos.o.id)).size;
+  const leyendaOrb = el('div', { class: 'fig-cab' }, leyenda([['circulo', 'var(--cx-s)', 'Reflectance spectrum', cuantos('spectra')],
+                                                           ['cuadro', 'var(--cx-c)', 'Light curve', cuantos('lightcurves')]]));
+  const figura = (eje, puntos, numero, texto) => {
+    const fuera = fueraDeMarco(puntos, eje, 'full');
+    return el('figure', { class: 'fig' },
+      lienzo(figuraOrbital({ eje, puntos, alto: 380, descripcion: `Semimajor axis versus ${eje === 'e' ? 'eccentricity' : 'inclination'} of the asteroids in our publications`,
+        tip: d => [el('strong', {}, nombreObjeto(d.o)), el('span', {}, d.txt), el('span', { class: 'mono' }, eje === 'e' ? `a ${d.o.a_au}  e ${d.o.e}` : `a ${d.o.a_au}  i ${incl(d.o)}°`)],
+        alClic: d => { location.href = ruta(`${d.modulo}/#${encodeURIComponent(d.o.id)}`); } })),
+      el('figcaption', {}, el('b', {}, `Figure ${numero}. `), texto,
+        CAPAS_ORB.fondo.length ? ` Small grey dots: a sample of ${CAPAS_ORB.fondo.length.toLocaleString('en')} known asteroids.` : '',
+        fuera.length ? ` Not shown: ${fuera.map(p => nombreObjeto(p.datos.o)).join(', ')}.` : '', ' Click a point to open the object.'));
+  };
+  const figsOrb = el('div', { class: 'figs-orbitales' },
+    figura('e', puntosE, 1, 'Osculating semimajor axis and eccentricity (JPL Small-Body Database) of the asteroids in our publications. Grey lines: perihelion distance q = 1.017, 1.3 and 1.67 au, aphelion distance Q = 0.983 au and a = 1 au, which separate Atiras, Atens, Apollos, Amors, Mars-crossers (MCs) and the main belt.'),
+    figura('i', puntosI, 2, ['Osculating semimajor axis and inclination (JPL Small-Body Database) of the same asteroids. Dashed grey lines: 5:1, 4:1 and 3:1 mean-motion resonances with Jupiter; dashed black curves: ',
+      el('var', {}, 'ν'), el('sub', {}, '6'), ' and ', el('var', {}, 'ν'), el('sub', {}, '16'), ' secular resonances.']));
 
   const instalaciones = el('dl', { class: 'instalaciones' },
     el('div', {}, el('dt', {}, '2.1-m telescope, Guillermo Haro Astrophysical Observatory (OAGH)'),
@@ -63,15 +73,15 @@
 
   $('#contenido').replaceChildren(el('div', { class: 'pila' },
     el('section', { class: 'panel' },
-      el('p', { class: 'entrada' }, 'The INAOE Minor Planets Group studies the physical properties of asteroids — their composition, rotation and size — with telescopes operated by the National Institute of Astrophysics, Optics and Electronics in Mexico. This site gathers the results we have published: visible reflectance spectra with their taxonomic classification, and rotational light curves.'),
-      el('p', { class: 'entrada' }, 'INAOE is a founding member of the International Asteroid Warning Network (IAWN). Part of our work characterises near-Earth asteroids during their close approaches to Earth.'),
+      el('div', { class: 'intro-cols' },
+        el('p', { class: 'entrada' }, 'The INAOE Minor Planets Group studies the physical properties of asteroids — their composition, rotation and size — with telescopes operated by the National Institute of Astrophysics, Optics and Electronics in Mexico. This site gathers the results we have published.'),
+        el('p', { class: 'entrada' }, 'They include visible reflectance spectra with their taxonomic classification, and rotational light curves. INAOE is a founding member of the International Asteroid Warning Network (IAWN), and part of our work characterises near-Earth asteroids during their close approaches to Earth.')),
       el('div', { class: 'tarjetas' },
         tarjeta('spectra/', 'II', 'Spectra', espectros.length, 'asteroids', 'Visible reflectance spectra (0.44–0.92 µm) from OAGH, classified in the Bus & Binzel taxonomy.'),
         tarjeta('classification/', 'III', 'Classification', 'In preparation', '', 'Classify your own spectrum in the browser with the hybrid method of Buendia et al. (2026).', true),
         tarjeta('lightcurves/', 'IV', 'Light curves', objetosLC.length, 'asteroids', 'Rotation periods and light-curve amplitudes from the Tonantzintla Schmidt Camera.'))),
-    el('div', { class: 'rejilla-2' },
-      el('section', { class: 'panel' }, el('h3', {}, 'Asteroids in our publications'), fig1),
-      el('section', { class: 'panel' }, el('h3', {}, 'Facilities'), instalaciones)),
+    el('section', { class: 'panel' }, el('h3', {}, 'Asteroids in our publications'), leyendaOrb, figsOrb),
+    el('section', { class: 'panel' }, el('h3', {}, 'Facilities'), instalaciones),
     el('section', { class: 'panel', id: 'publications' },
       el('div', { class: 'cab-seccion' }, el('h2', {}, 'Publications'), el('p', { class: 'sub' }, 'Refereed papers and notes whose results appear on this site.')),
       tablaPubs)));

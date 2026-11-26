@@ -106,3 +106,15 @@ pre.bibtex{margin:10px 0 0; padding:10px 12px; background:var(--surface-2); bord
   .filtros-fila input[type=search]{width:100%}
   .filtros-fila .cuenta-res{margin-left:0}
 }
+
+/* home: introduction in two columns and the two orbital figures side by side on wide screens */
+.intro-cols .entrada{max-width:none}
+.figs-orbitales{display:grid; grid-template-columns:minmax(0,1fr); gap:22px}
+.figs-orbitales .fig{margin:0}
+@media (min-width:981px){
+  .intro-cols{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 40px; align-items:start}
+  .intro-cols .entrada{text-align:justify; hyphens:auto; -webkit-hyphens:auto}     /* justified only where lines are long enough */
+  .intro-cols .entrada + .entrada{margin-top:0}
+  .figs-orbitales{grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px}
+  .instalaciones{grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px 28px}
+}
